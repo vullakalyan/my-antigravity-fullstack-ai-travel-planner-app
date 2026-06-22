@@ -1,0 +1,189 @@
+<svg width="520" height="520" viewBox="0 0 520 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background radial glow -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.12"/>
+      <stop offset="60%" stop-color="#ffd700" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Cyan gradient -->
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1adcff"/>
+      <stop offset="100%" stop-color="#006680"/>
+    </linearGradient>
+
+    <!-- Gold gradient -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd700"/>
+      <stop offset="100%" stop-color="#b8860b"/>
+    </linearGradient>
+
+    <!-- Suitcase body gradient -->
+    <linearGradient id="suitBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1320"/>
+      <stop offset="100%" stop-color="#1a2332"/>
+    </linearGradient>
+
+    <!-- Planet gradient -->
+    <radialGradient id="planetGrad" cx="35%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#1a2332"/>
+      <stop offset="100%" stop-color="#050a12"/>
+    </radialGradient>
+
+    <!-- Glow filter for the suitcase -->
+    <filter id="cyanGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Gold glow filter -->
+    <filter id="goldGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- ── Ambient Glow Background ─────────────────────────── -->
+  <circle cx="260" cy="260" r="240" fill="url(#bgGlow)"/>
+
+  <!-- ── Stars & Particles ───────────────────────────────── -->
+  <!-- Tiny twinkling dots -->
+  <circle cx="60"  cy="60"  r="1.5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="140" cy="40"  r="1"   fill="#00d4ff" opacity="0.8"/>
+  <circle cx="420" cy="55"  r="1.5" fill="#ffd700" opacity="0.7"/>
+  <circle cx="480" cy="130" r="1"   fill="#ffffff" opacity="0.5"/>
+  <circle cx="35"  cy="310" r="1"   fill="#00d4ff" opacity="0.7"/>
+  <circle cx="490" cy="390" r="1.5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="70"  cy="430" r="1"   fill="#ffd700" opacity="0.5"/>
+  <circle cx="390" cy="460" r="1"   fill="#00d4ff" opacity="0.6"/>
+  <circle cx="180" cy="480" r="1.5" fill="#ffffff" opacity="0.5"/>
+
+  <!-- 4-point star top-left -->
+  <path d="M100 90 L103.5 98.5 L112 102 L103.5 105.5 L100 114 L96.5 105.5 L88 102 L96.5 98.5 Z"
+        fill="#ffd700" opacity="0.85"/>
+
+  <!-- 4-point star top-right large -->
+  <path d="M390 70 L394 80 L404 84 L394 88 L390 98 L386 88 L376 84 L386 80 Z"
+        fill="#00d4ff" opacity="0.9"/>
+
+  <!-- 4-point star bottom-right small -->
+  <path d="M430 380 L432 385 L437 387 L432 389 L430 394 L428 389 L423 387 L428 385 Z"
+        fill="#ffd700" opacity="0.75"/>
+
+  <!-- ── Dotted Travel Path ───────────────────────────────── -->
+  <path d="M60 380 Q140 200 260 270 T450 160"
+        stroke="url(#goldGrad)" stroke-width="2" stroke-dasharray="5 10"
+        stroke-linecap="round" opacity="0.6" fill="none"/>
+
+  <!-- ── Orbit Ring around planet ────────────────────────── -->
+  <ellipse cx="400" cy="320" rx="70" ry="22"
+           stroke="url(#cyanGrad)" stroke-width="1.5" stroke-dasharray="5 5"
+           opacity="0.55" transform="rotate(-18 400 320)"/>
+
+  <!-- ── Planet (top-right) ──────────────────────────────── -->
+  <circle cx="400" cy="320" r="42" fill="url(#planetGrad)" stroke="url(#cyanGrad)" stroke-width="1.5"/>
+  <!-- Planet surface detail -->
+  <circle cx="388" cy="310" r="8"  fill="#00d4ff" opacity="0.12"/>
+  <circle cx="408" cy="326" r="5"  fill="#ffd700" opacity="0.10"/>
+  <!-- Planet crater marks -->
+  <circle cx="392" cy="312" r="3"  fill="none" stroke="#00d4ff" stroke-width="1" opacity="0.5"/>
+  <circle cx="410" cy="325" r="2"  fill="none" stroke="#ffd700" stroke-width="1" opacity="0.4"/>
+
+  <!-- ── Floating Suitcase (center-left) ─────────────────── -->
+  <g transform="translate(120, 150)">
+    <!-- Shadow below suitcase -->
+    <ellipse cx="100" cy="215" rx="65" ry="10" fill="#000000" opacity="0.35"/>
+
+    <!-- Suitcase body -->
+    <rect x="25" y="60" width="150" height="115" rx="18"
+          fill="url(#suitBody)" stroke="url(#cyanGrad)" stroke-width="2.5"/>
+
+    <!-- Divider line (horizontal centre seam) -->
+    <line x1="25" y1="118" x2="175" y2="118"
+          stroke="url(#cyanGrad)" stroke-width="1.5" stroke-dasharray="3 4" opacity="0.5"/>
+
+    <!-- Vertical straps / ribs -->
+    <line x1="75"  y1="60" x2="75"  y2="175" stroke="url(#cyanGrad)" stroke-width="1.5" stroke-dasharray="2 4" opacity="0.4"/>
+    <line x1="125" y1="60" x2="125" y2="175" stroke="url(#cyanGrad)" stroke-width="1.5" stroke-dasharray="2 4" opacity="0.4"/>
+
+    <!-- Gold corner accents -->
+    <!-- TL -->
+    <path d="M25 78 L25 70 A8 8 0 0 1 33 62 L41 62"
+          stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- TR -->
+    <path d="M175 78 L175 70 A8 8 0 0 0 167 62 L159 62"
+          stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- BL -->
+    <path d="M25 157 L25 165 A8 8 0 0 0 33 173 L41 173"
+          stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- BR -->
+    <path d="M175 157 L175 165 A8 8 0 0 1 167 173 L159 173"
+          stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Handle -->
+    <path d="M72 62 L72 46 A8 8 0 0 1 80 38 L120 38 A8 8 0 0 1 128 46 L128 62"
+          stroke="url(#cyanGrad)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Handle grip bar -->
+    <rect x="78" y="56" width="44" height="9" rx="4.5" fill="url(#goldGrad)" opacity="0.9"/>
+
+    <!-- Travel stickers / badges -->
+    <!-- Badge 1: Cyan circle -->
+    <circle cx="52" cy="96" r="10" fill="none" stroke="#00d4ff" stroke-width="1.5" opacity="0.8"/>
+    <text x="52" y="100" font-family="monospace" font-size="9" fill="#00d4ff" text-anchor="middle" opacity="0.9">FR</text>
+
+    <!-- Badge 2: Gold star badge -->
+    <path d="M148 90 L150 96 L157 96 L151.5 100 L154 106 L148 102 L142 106 L144.5 100 L139 96 L146 96 Z"
+          fill="#ffd700" opacity="0.85"/>
+
+    <!-- Badge 3: Small patch rectangle -->
+    <rect x="46" y="138" width="22" height="14" rx="3" fill="#ffd700" opacity="0.25"
+          stroke="#ffd700" stroke-width="1"/>
+    <text x="57" y="149" font-family="monospace" font-size="7" fill="#ffd700" text-anchor="middle" opacity="0.9">JP</text>
+
+    <!-- Lock clasp in center -->
+    <rect x="90" y="109" width="20" height="16" rx="4"
+          fill="#050a12" stroke="url(#goldGrad)" stroke-width="1.5"/>
+    <rect x="95" y="104" width="10" height="8" rx="5"
+          fill="none" stroke="url(#goldGrad)" stroke-width="1.5"/>
+  </g>
+
+  <!-- ── Compass Rose (bottom-left area) ─────────────────── -->
+  <g transform="translate(62, 340)">
+    <!-- Outer ring -->
+    <circle cx="40" cy="40" r="38" fill="none" stroke="url(#cyanGrad)" stroke-width="1.5" opacity="0.5"/>
+    <circle cx="40" cy="40" r="30" fill="#050a12" stroke="url(#cyanGrad)" stroke-width="1" opacity="0.4"/>
+
+    <!-- Cardinal tick marks -->
+    <line x1="40" y1="2"  x2="40" y2="12" stroke="url(#cyanGrad)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="40" y1="68" x2="40" y2="78" stroke="url(#cyanGrad)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="2"  y1="40" x2="12" y2="40" stroke="url(#cyanGrad)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="68" y1="40" x2="78" y2="40" stroke="url(#cyanGrad)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- North needle (gold) -->
+    <polygon points="40,12 36,40 40,35 44,40" fill="url(#goldGrad)"/>
+    <!-- South needle (slate) -->
+    <polygon points="40,68 36,40 40,45 44,40" fill="#1a2332" stroke="url(#cyanGrad)" stroke-width="0.8"/>
+
+    <!-- Center dot -->
+    <circle cx="40" cy="40" r="4" fill="url(#goldGrad)"/>
+
+    <!-- N label -->
+    <text x="40" y="9" font-family="monospace" font-size="7" fill="#ffd700" text-anchor="middle" font-weight="bold">N</text>
+  </g>
+
+  <!-- ── Question Mark bubble ─────────────────────────────── -->
+  <g transform="translate(330, 108)">
+    <circle cx="30" cy="30" r="28" fill="#050a12" stroke="url(#goldGrad)" stroke-width="2" opacity="0.9"/>
+    <!-- Outer glow ring -->
+    <circle cx="30" cy="30" r="34" fill="none" stroke="#ffd700" stroke-width="1" opacity="0.2"/>
+    <text x="30" y="39" font-family="serif" font-size="30" font-weight="bold"
+          fill="url(#goldGrad)" text-anchor="middle" opacity="0.95">?</text>
+  </g>
+
+  <!-- ── Floating Sparkle Dots ───────────────────────────── -->
+  <circle cx="300" cy="190" r="3" fill="#00d4ff" opacity="0.8"/>
+  <circle cx="280" cy="420" r="2" fill="#ffd700" opacity="0.7"/>
+  <circle cx="155" cy="460" r="3" fill="#00d4ff" opacity="0.6"/>
+  <circle cx="460" cy="240" r="2" fill="#ffd700" opacity="0.8"/>
+</svg>

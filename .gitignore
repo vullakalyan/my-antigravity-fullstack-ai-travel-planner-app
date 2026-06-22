@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+
+# Environment files (NEVER commit secrets)
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large binary/media files
+*.zip
+reference-images/
+
+# MongoDB data
+db-data/
+mongo_out.log
+
+# Build artifacts
+dist/
+coverage/
