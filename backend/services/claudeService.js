@@ -243,26 +243,19 @@ const generateItinerary = async (tripData) => {
       messages: [{ role: 'user', content: userPrompt }],
     });
   } catch (apiError) {
-    // If Anthropic fails due to rate limiting, fall back to Groq
-    const isRateLimit = apiError?.statusCode === 429 || /rate limit/i.test(apiError.message);
-    if (isRateLimit) {
-      try {
-        response = await client.chat.completions.create({
-          model: MODEL,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt },
-          ],
-          response_format: { type: 'json_object' },
-        });
-      } catch (groqError) {
-        const err = new Error(`Groq API request failed: ${groqError.message}`);
-        err.statusCode = 502;
-        err.code = 'AI_API_ERROR';
-        throw err;
-      }
-    } else {
-      const err = new Error(`Anthropic API request failed: ${apiError.message}`);
+    // Fall back to Groq on any Anthropic failure
+    console.warn(`[AI Service] Anthropic API failed: ${apiError.message}. Falling back to Groq...`);
+    try {
+      response = await client.chat.completions.create({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        response_format: { type: 'json_object' },
+      });
+    } catch (groqError) {
+      const err = new Error(`Both Anthropic and Groq API requests failed. Anthropic: ${apiError.message}. Groq: ${groqError.message}`);
       err.statusCode = 502;
       err.code = 'AI_API_ERROR';
       throw err;
