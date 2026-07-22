@@ -1,9 +1,14 @@
 'use strict';
 
 const Groq = require('groq-sdk');
+const Anthropic = require('@anthropic-ai/sdk');
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
+});
+
+const anthropicClient = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 const MODEL = 'llama-3.3-70b-versatile';
@@ -213,102 +218,117 @@ Please provide the corrected JSON response. Remember:
  * @throws {ItineraryValidationError} - If generation fails after retry
  */
 const generateItinerary = async (tripData) => {
-  const messages = [
-    {
-      role: 'user',
-      content: buildUserPrompt(tripData),
-    },
-  ];
+  // Build prompts
+  const systemPrompt = buildSystemPrompt();
+  const userPrompt = buildUserPrompt(tripData);
 
-  // ── First Attempt ────────────────────────────────────────────────────────────
+  // Helper to extract raw text from either Groq or Anthropic response
+  const extractResponseText = (resp) => {
+    // Groq response format
+    if (resp?.choices?.[0]?.message?.content) return resp.choices[0].message.content;
+    // Anthropic response format
+    if (resp?.content?.[0]?.text) return resp.content[0].text;
+    return '';
+  };
+
+  // ── First Attempt ────────────────────────────────────────────────────────
   let response;
   try {
-    response = await client.chat.completions.create({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: buildSystemPrompt() },
-        ...messages
-      ],
-      response_format: { type: 'json_object' }
+    // Try Anthropic first
+    response = await anthropicClient.messages.create({
+      model: 'claude-3-5-sonnet-20240620', // adjust if needed
+      max_tokens: 1024,
+      temperature: 0,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
   } catch (apiError) {
-    const error = new Error(`Groq API request failed: ${apiError.message}`);
-    error.statusCode = 502;
-    error.code = 'CLAUDE_API_ERROR';
-    throw error;
+    // If Anthropic fails due to rate limiting, fall back to Groq
+    const isRateLimit = apiError?.statusCode === 429 || /rate limit/i.test(apiError.message);
+    if (isRateLimit) {
+      try {
+        response = await client.chat.completions.create({
+          model: MODEL,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+          response_format: { type: 'json_object' },
+        });
+      } catch (groqError) {
+        const err = new Error(`Groq API request failed: ${groqError.message}`);
+        err.statusCode = 502;
+        err.code = 'AI_API_ERROR';
+        throw err;
+      }
+    } else {
+      const err = new Error(`Anthropic API request failed: ${apiError.message}`);
+      err.statusCode = 502;
+      err.code = 'AI_API_ERROR';
+      throw err;
+    }
   }
 
-  const firstResponseText = response.choices[0]?.message?.content || '';
+  const firstResponseText = extractResponseText(response);
   let parsedData;
-
   try {
     parsedData = extractJSON(firstResponseText);
   } catch {
     parsedData = null;
   }
 
-  // Validate first response
+  // ── Validation & Possible Retry ───────────────────────────────────────
   if (parsedData) {
     const { valid, errors } = validateItineraryShape(parsedData);
-    if (valid) {
-      return parsedData;
+    if (valid) return parsedData;
+
+    console.warn('[AI Service] First response failed validation. Errors:', errors);
+    // Prepare corrective messages
+    const correctiveMessages = [
+      { role: 'assistant', content: firstResponseText },
+      { role: 'user', content: buildRetryPrompt(errors) },
+    ];
+
+    // Second attempt (use Groq for consistency)
+    try {
+      const retryResp = await client.chat.completions.create({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...correctiveMessages,
+        ],
+        response_format: { type: 'json_object' },
+      });
+      const retryText = extractResponseText(retryResp);
+      const retryParsed = extractJSON(retryText);
+      const { valid: rValid, errors: rErrors } = validateItineraryShape(retryParsed);
+      if (rValid) return retryParsed;
+      throw new ItineraryValidationError(`AI itinerary generation failed validation after retry: ${rErrors.join('; ')}`);
+    } catch (retryErr) {
+      throw new ItineraryValidationError(`AI retry failed: ${retryErr.message}`);
     }
-
-    // ── Retry with corrective prompt ─────────────────────────────────────────
-    console.warn('[ClaudeService] First response failed validation. Retrying with corrective prompt. Errors:', errors);
-
-    messages.push(
-      { role: 'assistant', content: firstResponseText },
-      { role: 'user', content: buildRetryPrompt(errors) }
-    );
   } else {
-    // JSON parsing failed — retry with a general correction request
-    messages.push(
-      { role: 'assistant', content: firstResponseText },
-      {
-        role: 'user',
-        content: 'Your previous response could not be parsed as JSON. Please respond with ONLY the raw JSON object — no markdown, no code fences, no text before or after the JSON.',
-      }
-    );
+    // If JSON could not be parsed at all, fallback to a Groq retry with a generic correction prompt
+    try {
+      const retryResp = await client.chat.completions.create({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+          { role: 'assistant', content: firstResponseText },
+          { role: 'user', content: 'Your previous response could not be parsed as JSON. Please respond with ONLY the raw JSON object.' },
+        ],
+        response_format: { type: 'json_object' },
+      });
+      const retryText = extractResponseText(retryResp);
+      const retryParsed = extractJSON(retryText);
+      const { valid: rValid, errors: rErrors } = validateItineraryShape(retryParsed);
+      if (rValid) return retryParsed;
+      throw new ItineraryValidationError(`AI itinerary generation failed validation after retry: ${rErrors.join('; ')}`);
+    } catch (finalErr) {
+      throw new ItineraryValidationError(`AI final attempt failed: ${finalErr.message}`);
+    }
   }
-
-  // ── Second Attempt ───────────────────────────────────────────────────────────
-  let retryResponse;
-  try {
-    retryResponse = await client.chat.completions.create({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: buildSystemPrompt() },
-        ...messages
-      ],
-      response_format: { type: 'json_object' }
-    });
-  } catch (apiError) {
-    const error = new Error(`Groq API retry request failed: ${apiError.message}`);
-    error.statusCode = 502;
-    error.code = 'CLAUDE_API_ERROR';
-    throw error;
-  }
-
-  const retryResponseText = retryResponse.choices[0]?.message?.content || '';
-  let retryParsedData;
-
-  try {
-    retryParsedData = extractJSON(retryResponseText);
-  } catch {
-    throw new ItineraryValidationError(
-      'Claude returned an unparseable response after retry. Please try again.'
-    );
-  }
-
-  const { valid: retryValid, errors: retryErrors } = validateItineraryShape(retryParsedData);
-  if (!retryValid) {
-    throw new ItineraryValidationError(
-      `Claude itinerary generation failed validation after retry: ${retryErrors.join('; ')}`
-    );
-  }
-
-  return retryParsedData;
 };
 
 module.exports = { generateItinerary };
