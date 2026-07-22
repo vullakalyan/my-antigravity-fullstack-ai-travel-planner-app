@@ -5,7 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  NEXT_PUBLIC_API_URL = "https://my-antigravity-fullstack-ai-travel.onrender.com/api"
+  NEXT_PUBLIC_API_URL = "https://my-antigravity-fullstack-ai-travel.onrender.com"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
