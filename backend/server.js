@@ -21,15 +21,23 @@ connectDB();
 // ── Security Middleware ────────────────────────────────────────────────────────
 app.use(helmet());
 
-// CORS — restrict to configured origin only
-const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:3000';
+// CORS — allow localhost and Netlify origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://comfy-dieffenbachia-c64da9.netlify.app'
+];
+if (process.env.CORS_ORIGIN) {
+  allowedOrigins.push(process.env.CORS_ORIGIN);
+}
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g., mobile apps, Postman in dev)
-      if (!origin || origin === allowedOrigin) {
+      // Allow requests with no origin (e.g., mobile apps, Postman)
+      if (!origin || allowedOrigins.some(o => o.replace(/\/$/, '') === origin.replace(/\/$/, ''))) {
         callback(null, true);
       } else {
+        console.warn(`[CORS] Rejected request from origin: ${origin}`);
         callback(new Error(`CORS policy does not allow origin: ${origin}`));
       }
     },
