@@ -86,6 +86,10 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // ── Health Check ───────────────────────────────────────────────────────────────
+app.get('/', (req, res) => {
+  res.json({ success: true, message: 'AI Travel Planner API is running' });
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({
     success: true,
